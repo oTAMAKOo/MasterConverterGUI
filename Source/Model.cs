@@ -27,9 +27,7 @@ namespace MasterConverterGUI
 
         public Mode Mode { get; set; }
         public MasterInfo[] MasterInfos { get; private set; }
-
-        public string[] Tags { get; private set; }
-        public bool YamlGenerate { get; set; }
+        public UserInfo UserInfo { get; private set; }
 
         //----- method -----   
 
@@ -37,9 +35,9 @@ namespace MasterConverterGUI
         {
             Mode = Mode.Import;
             MasterInfos = new MasterInfo[0];
+            UserInfo = new UserInfo();
 
-            Tags = new string[0];
-            YamlGenerate = false;
+            UserInfo.Load();
         }
 
         public void Register(string[] paths)
@@ -95,11 +93,6 @@ namespace MasterConverterGUI
             {
                 onUpdateMasters.OnNext(MasterInfos);
             }
-        }
-
-        public void SetTags(string text)
-        {
-            Tags = text.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
         }
 
         public IObservable<MasterInfo[]> OnUpdateMastersAsObservable()

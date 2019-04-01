@@ -48,6 +48,11 @@ namespace MasterConverterGUI
             progressBar1.Hide();
         }
 
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            model.UserInfo.Save();
+        }
+
         //------ コンボボックスコントロール制御 ------
 
         private void InitializeComboBox()
@@ -60,6 +65,27 @@ namespace MasterConverterGUI
         private void comboBox1_SelectionChangeCommitted(object sender, EventArgs e)
         {
             model.Mode = (Mode)comboBox1.SelectedIndex;
+
+            textBox1.Text = string.Empty;
+
+            if (model.Mode == Mode.Build)
+            {
+                var builder = new StringBuilder();
+
+                var messagePackDirectory = model.UserInfo.Data.MessagePackDirectory;
+                var text = string.IsNullOrEmpty(messagePackDirectory) ? "---" : messagePackDirectory;
+                builder.AppendLine(string.Format("[Export] MessagePack : {0}", text));
+
+                // Yamlはディレクトリ指定がない場合は出力されない.
+                var yamlDirectory = model.UserInfo.Data.YamlDirectory;
+
+                if (!string.IsNullOrEmpty(yamlDirectory))
+                {
+                    builder.AppendLine(string.Format("[Export] Yaml : {0}", yamlDirectory));
+                }
+
+                textBox1.Text += builder.ToString();
+            }
         }
 
         //------ リストビューコントロール制御 ------
@@ -132,23 +158,53 @@ namespace MasterConverterGUI
             }
         }
 
-        //------ オプションチェックボックス制御 ------
+        //------ オプション制御 ------
 
         private void InitializeOptions()
         {
-            checkBox1.Checked = model.YamlGenerate;
-        }
-
-        // Yaml出力チェックボックス.
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            model.YamlGenerate = checkBox1.Checked;
+            textBox2.Text = model.UserInfo.Data.Tags;
         }
 
         // タグ設定テキストボックス.
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            model.SetTags(textBox2.Text);
+            model.UserInfo.Data.Tags = textBox2.Text;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var selectionDirectory = model.UserInfo.Data.MessagePackDirectory;
+
+            model.UserInfo.Data.MessagePackDirectory = OpenSaveFolderBrowserDialog(selectionDirectory);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var selectionDirectory = model.UserInfo.Data.YamlDirectory;
+
+            model.UserInfo.Data.YamlDirectory = OpenSaveFolderBrowserDialog(selectionDirectory);
+        }
+
+        // 保存先フォルダ選択ダイアログ.
+        private string OpenSaveFolderBrowserDialog(string selectionDirectory)
+        {
+            var path = string.Empty;
+
+            var fbd = new FolderBrowserDialog();
+
+            fbd.Description = "フォルダを指定してください。";
+
+            if(string.IsNullOrEmpty(selectionDirectory) && Directory.Exists(selectionDirectory))
+            {
+                fbd.SelectedPath = selectionDirectory;
+            }
+            
+            if (fbd.ShowDialog(this) == DialogResult.OK)
+            {
+                path = fbd.SelectedPath;
+            }
+
+            return path;
         }
 
         //------ マスターコンバーター実行制御 ------
@@ -167,7 +223,6 @@ namespace MasterConverterGUI
             progressBar1.Minimum = 0;
             progressBar1.Maximum = masterInfos.Length;
             progressBar1.Value = 0;
-            progressBar1.Show();
 
             textBox1.Text = string.Empty;
 
@@ -189,13 +244,16 @@ namespace MasterConverterGUI
                 {
                     var arguments = new StringBuilder();
 
-                    arguments.AppendFormat("-i {0} ", masterInfo.directory);
-                    arguments.AppendFormat("-m {0} ", Constants.GetArgumentText(model.Mode));
-                    arguments.AppendFormat("-y {0} ", model.YamlGenerate.ToString());
+                    arguments.AppendFormat("-input {0} ", masterInfo.directory);
+                    arguments.AppendFormat("-mode {0} ", Constants.GetArgumentText(model.Mode));
+                    arguments.AppendFormat("-messagepack {0} ", model.UserInfo.Data.MessagePackDirectory);
+                    arguments.AppendFormat("-yaml {0} ", model.UserInfo.Data.YamlDirectory);
 
-                    if (model.Tags.Any())
+                    var tags = model.UserInfo.Data.Tags.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
+
+                    if (tags.Any())
                     {
-                        arguments.AppendFormat("-t {0} ", string.Join(",", model.Tags));
+                        arguments.AppendFormat("-tag {0} ", string.Join(",", tags));
                     }
 
                     process.StartInfo = new ProcessStartInfo()
@@ -245,7 +303,7 @@ namespace MasterConverterGUI
                 textBox1.Text += logBuilder.ToString();
             }
 
-            progressBar1.Hide();
+            progressBar1.Value = 0;
 
             if (success != masterInfos.Length)
             {
