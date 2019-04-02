@@ -65,7 +65,7 @@ namespace MasterConverterGUI
                     directory = path;
                 }
 
-                var filePaths = Directory.EnumerateFiles(directory, "ClassSchema.xlsx");
+                var filePaths = Directory.EnumerateFiles(directory, "ClassSchema.xlsx", SearchOption.AllDirectories);
 
                 foreach (var filePath in filePaths)
                 {
