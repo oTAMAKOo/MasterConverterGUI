@@ -13,8 +13,15 @@ namespace MasterConverterGUI
 
         public class UserData
         {
+            /// <summary> タグ </summary>
             public string Tags { get; set; }
+            /// <summary> MessagePackを出力するか </summary>
+            public bool GenerateMessagePack { get; set; }
+            /// <summary> MessagePack出力ディレクトリ </summary>
             public string MessagePackDirectory { get; set; }
+            /// <summary> Yamlを出力するか </summary>
+            public bool GenerateYaml { get; set; }
+            /// <summary> Yaml出力ディレクトリ </summary>
             public string YamlDirectory { get; set; }
         }
 

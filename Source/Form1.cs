@@ -45,7 +45,7 @@ namespace MasterConverterGUI
             InitializeComboBox();
             InitializeOptions();
 
-            progressBar1.Hide();
+            UpdateExecButton();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -64,28 +64,36 @@ namespace MasterConverterGUI
 
         private void comboBox1_SelectionChangeCommitted(object sender, EventArgs e)
         {
+            var userData = model.UserInfo.Data;
+
             model.Mode = (Mode)comboBox1.SelectedIndex;
 
             textBox1.Text = string.Empty;
 
-            if (model.Mode == Mode.Build)
+            var builder = new StringBuilder();
+
+            switch (model.Mode)
             {
-                var builder = new StringBuilder();
+                case Mode.Build:
+                    {
+                        var directory = string.Empty;
 
-                var messagePackDirectory = model.UserInfo.Data.MessagePackDirectory;
-                var text = string.IsNullOrEmpty(messagePackDirectory) ? "---" : messagePackDirectory;
-                builder.AppendLine(string.Format("[Export] MessagePack : {0}", text));
+                        // MessagePack.
+                        var messagePackDirectory = userData.MessagePackDirectory;
+                        directory = string.IsNullOrEmpty(messagePackDirectory) ? "---" : messagePackDirectory;
+                        builder.AppendLine(string.Format("[Export] MessagePack : {0}", directory));
 
-                // Yamlはディレクトリ指定がない場合は出力されない.
-                var yamlDirectory = model.UserInfo.Data.YamlDirectory;
-
-                if (!string.IsNullOrEmpty(yamlDirectory))
-                {
-                    builder.AppendLine(string.Format("[Export] Yaml : {0}", yamlDirectory));
-                }
-
-                textBox1.Text += builder.ToString();
+                        // Yaml.
+                        var yamlDirectory = userData.YamlDirectory;
+                        directory = string.IsNullOrEmpty(yamlDirectory) ? "---" : yamlDirectory;
+                        builder.AppendLine(string.Format("[Export] Yaml : {0}", directory));
+                    }
+                    break;
             }
+
+            textBox1.Text += builder.ToString();
+
+            UpdateExecButton();
         }
 
         //------ リストビューコントロール制御 ------
@@ -163,6 +171,8 @@ namespace MasterConverterGUI
         private void InitializeOptions()
         {
             textBox2.Text = model.UserInfo.Data.Tags;
+            checkBox1.Checked = model.UserInfo.Data.GenerateMessagePack;
+            checkBox2.Checked = model.UserInfo.Data.GenerateYaml;
         }
 
         // タグ設定テキストボックス.
@@ -183,6 +193,20 @@ namespace MasterConverterGUI
             var selectionDirectory = model.UserInfo.Data.YamlDirectory;
 
             model.UserInfo.Data.YamlDirectory = OpenSaveFolderBrowserDialog(selectionDirectory);
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            model.UserInfo.Data.GenerateMessagePack = checkBox1.Checked;
+            
+            UpdateExecButton();
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            model.UserInfo.Data.GenerateYaml = checkBox2.Checked;
+
+            UpdateExecButton();
         }
 
         // 保存先フォルダ選択ダイアログ.
@@ -207,10 +231,35 @@ namespace MasterConverterGUI
             return path;
         }
 
-        //------ マスターコンバーター実行制御 ------
+        //------ 実行ボタン制御 ------
 
         private void ExecButton_Click(object sender, EventArgs e)
         {
+            ExecMasterConverter();
+        }
+
+        private void UpdateExecButton()
+        {
+            switch (model.Mode)
+            {
+                case Mode.Build:
+                {
+                    ExecButton.Enabled = model.UserInfo.Data.GenerateMessagePack || model.UserInfo.Data.GenerateYaml;
+                }
+                    break;
+
+                default:
+                    ExecButton.Enabled = true;
+                    break;
+            }
+        }
+
+        //------ マスターコンバーター実行制御 ------
+
+        private void ExecMasterConverter()
+        {
+            var userData = model.UserInfo.Data;
+
             var logBuilder = new StringBuilder();
 
             DataReceivedEventHandler logReceive = (x, y) =>
@@ -228,6 +277,39 @@ namespace MasterConverterGUI
 
             var success = 0;
 
+            var tags = string.Empty;
+            var export = string.Empty;
+
+            var modeText = Constants.GetArgumentText(model.Mode);
+
+            switch (model.Mode)
+            {
+                case Mode.Build:
+                {
+                    var generateMessagePack = userData.GenerateMessagePack;
+                    var generateYaml = userData.GenerateYaml;
+                        
+                    if (generateMessagePack && generateYaml)
+                    {
+                        export = "both";
+                    }
+                    else if (generateMessagePack)
+                    {
+                        export = "messagepack";
+                    }
+                    else if (generateYaml)
+                    {
+                        export = "yaml";
+                    }
+
+                    if (!string.IsNullOrEmpty(userData.Tags))
+                    {
+                        tags = string.Join(",", userData.Tags.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray());
+                    }
+                }
+                    break;
+            }
+
             for (var i = 0; i < masterInfos.Length; i++)
             {
                 var masterInfo = masterInfos[i];
@@ -242,19 +324,26 @@ namespace MasterConverterGUI
 
                 using (var process = new Process())
                 {
+                    // 引数.
+
                     var arguments = new StringBuilder();
 
                     arguments.AppendFormat("-input {0} ", masterInfo.directory);
-                    arguments.AppendFormat("-mode {0} ", Constants.GetArgumentText(model.Mode));
-                    arguments.AppendFormat("-messagepack {0} ", model.UserInfo.Data.MessagePackDirectory);
-                    arguments.AppendFormat("-yaml {0} ", model.UserInfo.Data.YamlDirectory);
-
-                    var tags = model.UserInfo.Data.Tags.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-
-                    if (tags.Any())
+                    arguments.AppendFormat("-mode {0} ", modeText);
+                    arguments.AppendFormat("-messagepack {0} ", userData.MessagePackDirectory);
+                    arguments.AppendFormat("-yaml {0} ", userData.YamlDirectory);
+                    
+                    if (!string.IsNullOrEmpty(tags))
                     {
-                        arguments.AppendFormat("-tag {0} ", string.Join(",", tags));
+                        arguments.AppendFormat("-tag {0} ", tags);
                     }
+
+                    if (!string.IsNullOrEmpty(export))
+                    {
+                        arguments.AppendFormat("-export {0} ", export);
+                    }
+
+                    // コンソールアプリ起動.
 
                     process.StartInfo = new ProcessStartInfo()
                     {
