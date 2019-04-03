@@ -68,7 +68,7 @@ namespace MasterConverterGUI
 
             model.Mode = (Mode)comboBox1.SelectedIndex;
 
-            textBox1.Text = string.Empty;
+            richTextBox1.Text = string.Empty;
 
             var builder = new StringBuilder();
 
@@ -91,7 +91,7 @@ namespace MasterConverterGUI
                     break;
             }
 
-            textBox1.Text += builder.ToString();
+            richTextBox1.Text += builder.ToString();
 
             UpdateExecButton();
         }
@@ -273,7 +273,7 @@ namespace MasterConverterGUI
             progressBar1.Maximum = masterInfos.Length;
             progressBar1.Value = 0;
 
-            textBox1.Text = string.Empty;
+            richTextBox1.Text = string.Empty;
 
             var success = 0;
 
@@ -318,8 +318,6 @@ namespace MasterConverterGUI
 
                 logBuilder.Clear();
 
-                textBox1.Text += string.Format("{0}\n", masterInfo.masterName);
-
                 var hasError = false;
 
                 using (var process = new Process())
@@ -328,19 +326,27 @@ namespace MasterConverterGUI
 
                     var arguments = new StringBuilder();
 
-                    arguments.AppendFormat("-input {0} ", masterInfo.directory);
-                    arguments.AppendFormat("-mode {0} ", modeText);
-                    arguments.AppendFormat("-messagepack {0} ", userData.MessagePackDirectory);
-                    arguments.AppendFormat("-yaml {0} ", userData.YamlDirectory);
+                    arguments.AppendFormat("--input {0} ", masterInfo.directory);
+                    arguments.AppendFormat("--mode {0} ", modeText);
+
+                    if (!string.IsNullOrEmpty(userData.MessagePackDirectory))
+                    {
+                        arguments.AppendFormat("--messagepack {0} ", userData.MessagePackDirectory);
+                    }
+
+                    if (!string.IsNullOrEmpty(userData.YamlDirectory))
+                    {
+                        arguments.AppendFormat("--yaml {0} ", userData.YamlDirectory);
+                    }
                     
                     if (!string.IsNullOrEmpty(tags))
                     {
-                        arguments.AppendFormat("-tag {0} ", tags);
+                        arguments.AppendFormat("--tag {0} ", tags);
                     }
 
                     if (!string.IsNullOrEmpty(export))
                     {
-                        arguments.AppendFormat("-export {0} ", export);
+                        arguments.AppendFormat("--export {0} ", export);
                     }
 
                     // コンソールアプリ起動.
@@ -385,11 +391,22 @@ namespace MasterConverterGUI
                 {
                     var separator = "------------------------------------------------------";
 
-                    logBuilder.Insert(0, separator);
+                    var headerBuilder = new StringBuilder();
+
+                    headerBuilder.AppendLine(separator);
+                    headerBuilder.AppendLine(string.Format("[Error] {0}", masterInfo.masterName));
+                    headerBuilder.AppendLine(separator);
+
+                    logBuilder.Insert(0, headerBuilder.ToString());
+
                     logBuilder.AppendLine(separator);
                 }
+                else
+                {
+                    logBuilder.AppendFormat("[Success] {0}", masterInfo.masterName).AppendLine();
+                }
 
-                textBox1.Text += logBuilder.ToString();
+                richTextBox1.Text += logBuilder.ToString();
             }
 
             progressBar1.Value = 0;
@@ -401,6 +418,6 @@ namespace MasterConverterGUI
 
                 MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
+        }        
     }
 }
