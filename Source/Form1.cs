@@ -96,6 +96,46 @@ namespace MasterConverterGUI
             UpdateExecButton();
         }
 
+        //------ ログテキストビューコントロール制御 ------
+
+        delegate void TextBoxDeledate(string text);
+
+        private void SetLogText(string text)
+        {
+            if (richTextBox1.InvokeRequired)
+            {
+                // 呼び出しスレッドとスレッドIDが異なる場合
+                TextBoxDeledate temp_del = new TextBoxDeledate(SetLogText);
+
+                Invoke(temp_del, new object[] { text });
+            }
+            else
+            {
+                // 呼び出しスレッドとスレッドIDが一致している場合、直接フォームコントロールに設定.
+                richTextBox1.Text = text;
+            }
+        }
+
+        //------ プログレスバーコントロール制御 ------
+
+        delegate void ProgressbarDeledate(int value);
+
+        private void SetProgress(int value)
+        {
+            if (richTextBox1.InvokeRequired)
+            {
+                // 呼び出しスレッドとスレッドIDが異なる場合
+                ProgressbarDeledate temp_del = new ProgressbarDeledate(SetProgress);
+
+                Invoke(temp_del, new object[] { value });
+            }
+            else
+            {
+                // 呼び出しスレッドとスレッドIDが一致している場合、直接フォームコントロールに設定.
+                progressBar1.Value = value;
+            }
+        }
+
         //------ リストビューコントロール制御 ------
 
         private void InitializeListView()
@@ -269,9 +309,9 @@ namespace MasterConverterGUI
 
         //------ 実行ボタン制御 ------
 
-        private void ExecButton_Click(object sender, EventArgs e)
+        private async void ExecButton_Click(object sender, EventArgs e)
         {
-            ExecMasterConverter();
+            await ExecMasterConverter();
         }
 
         private void UpdateExecButton()
@@ -292,168 +332,57 @@ namespace MasterConverterGUI
 
         //------ マスターコンバーター実行制御 ------
 
-        private void ExecMasterConverter()
+        private async Task ExecMasterConverter()
         {
-            var userData = model.UserInfo.Data;
+            var success = 0;
+            var progress = 0;
 
             var logBuilder = new StringBuilder();
 
-            DataReceivedEventHandler logReceive = (x, y) =>
-            {
-                if (y.Data != null) { logBuilder.AppendLine(y.Data); }
-            };
-
             var masterInfos = model.MasterInfos.Where(x => x.selection).ToArray();
+
+            richTextBox1.Text = string.Empty;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = masterInfos.Length;
             progressBar1.Value = 0;
 
-            richTextBox1.Text = string.Empty;
-
-            var success = 0;
-
-            var tags = string.Empty;
-            var export = string.Empty;
-
-            var modeText = Constants.GetArgumentText(model.Mode);
-
-            switch (model.Mode)
+            Action<bool, string> onExecFinish = (result, log) =>
             {
-                case Mode.Build:
+                if(result)
                 {
-                    var generateMessagePack = userData.GenerateMessagePack;
-                    var generateYaml = userData.GenerateYaml;
-                        
-                    if (generateMessagePack && generateYaml)
-                    {
-                        export = "both";
-                    }
-                    else if (generateMessagePack)
-                    {
-                        export = "messagepack";
-                    }
-                    else if (generateYaml)
-                    {
-                        export = "yaml";
-                    }
-
-                    if (!string.IsNullOrEmpty(userData.Tags))
-                    {
-                        tags = string.Join(",", userData.Tags.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray());
-                    }
-                }
-                    break;
-            }
-
-            for (var i = 0; i < masterInfos.Length; i++)
-            {
-                var masterInfo = masterInfos[i];
-
-                progressBar1.Value = i;
-
-                logBuilder.Clear();
-
-                var hasError = false;
-
-                using (var process = new Process())
-                {
-                    // 引数.
-
-                    var arguments = new StringBuilder();
-
-                    arguments.AppendFormat("--input {0} ", masterInfo.directory);
-                    arguments.AppendFormat("--mode {0} ", modeText);
-
-                    if (!string.IsNullOrEmpty(userData.MessagePackDirectory))
-                    {
-                        arguments.AppendFormat("--messagepack {0} ", userData.MessagePackDirectory);
-                    }
-
-                    if (!string.IsNullOrEmpty(userData.YamlDirectory))
-                    {
-                        arguments.AppendFormat("--yaml {0} ", userData.YamlDirectory);
-                    }
-                    
-                    if (!string.IsNullOrEmpty(tags))
-                    {
-                        arguments.AppendFormat("--tag {0} ", tags);
-                    }
-
-                    if (!string.IsNullOrEmpty(export))
-                    {
-                        arguments.AppendFormat("--export {0} ", export);
-                    }
-
-                    // コンソールアプリ起動.
-
-                    process.StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = @"./MasterConverter.exe",
-
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-
-                        Arguments = arguments.ToString(),
-                    };
-
-                    process.OutputDataReceived += logReceive;
-                    process.ErrorDataReceived += logReceive;
-
-                    process.Start();
-
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-
-                    process.WaitForExit();
-
-                    process.CancelOutputRead();
-                    process.CancelErrorRead();
-
-                    if (process.ExitCode == 0)
-                    {
-                        success++;
-                    }
-                    else
-                    {
-                        hasError = true;
-                    }
+                    success++;
                 }
 
-                if (hasError)
+                lock (logBuilder)
                 {
-                    var separator = "------------------------------------------------------";
-
-                    var headerBuilder = new StringBuilder();
-
-                    headerBuilder.AppendLine(separator);
-                    headerBuilder.AppendLine(string.Format("[Error] {0}", masterInfo.masterName));
-                    headerBuilder.AppendLine(separator);
-
-                    logBuilder.Insert(0, headerBuilder.ToString());
-
-                    logBuilder.AppendLine(separator);
-                }
-                else
-                {
-                    logBuilder.AppendFormat("[Success] {0}", masterInfo.masterName).AppendLine();
+                    logBuilder.AppendLine(log);                    
                 }
 
-                richTextBox1.Text += logBuilder.ToString();
-            }
+                progress++;
+
+                SetLogText(logBuilder.ToString());
+                SetProgress(progress);
+            };
+
+            await model.ConvertMaster(onExecFinish);
 
             progressBar1.Value = 0;
 
-            if (success != masterInfos.Length)
+            if (success == masterInfos.Length)
+            {
+                var caption = "Convert Complete";
+                var message = string.Format("Convert {0} masters finish.", success);
+
+                MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
             {
                 var caption = "Convert Error";
                 var message = string.Format("Convert Failed {0} masters.", masterInfos.Length - success);
 
                 MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }        
+        }       
     }
 }

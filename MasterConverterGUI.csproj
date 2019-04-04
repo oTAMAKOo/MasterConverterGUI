@@ -80,6 +80,7 @@
     <Compile Include="Source\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\UserInfo.cs" />
+    <Compile Include="Modules\TaskQueue.cs" />
     <EmbeddedResource Include="Source\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
