@@ -182,6 +182,10 @@
             this.listView1.Size = new System.Drawing.Size(465, 181);
             this.listView1.TabIndex = 10;
             this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.listView1_DrawColumnHeader);
+            this.listView1.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.listView1_DrawItem);
+            this.listView1.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.listView1_DrawSubItem);
+            this.listView1.SizeChanged += new System.EventHandler(this.listView1_Resize);
             // 
             // richTextBox1
             // 

@@ -103,20 +103,51 @@ namespace MasterConverterGUI
             listView1.FullRowSelect = true;
             listView1.GridLines = true;
             listView1.CheckBoxes = true;
-            listView1.Sorting = SortOrder.Ascending;
+            listView1.OwnerDraw = true;
+            listView1.Sorting = SortOrder.None;
             listView1.View = View.Details;
+            listView1.HeaderStyle = ColumnHeaderStyle.None;
 
             listView1.ItemCheck += ListView1_ItemCheck1;
 
-            // 列（コラム）ヘッダの作成.
+            // 列（コラム）ヘッダの作成.            
             var masterNameColumn = new ColumnHeader() { Text = "Master", Width = 200 };
             var masterDirectoryColumn = new ColumnHeader() { Text = "Directory", Width = -2 };
 
             ColumnHeader[] colHeaderRegValue = { masterNameColumn, masterDirectoryColumn };
 
             listView1.Columns.AddRange(colHeaderRegValue);
+
+            SizeLastColumn(listView1);
         }
-        
+
+        private void listView1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
+        {
+            e.Graphics.FillRectangle(SystemBrushes.Menu, e.Bounds);
+            e.Graphics.DrawRectangle(SystemPens.GradientInactiveCaption,
+                                     new Rectangle(e.Bounds.X, 0, e.Bounds.Width, e.Bounds.Height));
+
+            string text = listView1.Columns[e.ColumnIndex].Text;
+            TextFormatFlags cFlag = TextFormatFlags.HorizontalCenter
+                                    | TextFormatFlags.VerticalCenter;
+            TextRenderer.DrawText(e.Graphics, text, listView1.Font, e.Bounds, Color.Black, cFlag);
+        }
+
+        private void listView1_DrawItem(object sender, DrawListViewItemEventArgs e)
+        {
+            e.DrawDefault = true;
+        }
+
+        private void listView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        {
+            e.DrawDefault = true;
+        }
+
+        private void listView1_Resize(object sender, System.EventArgs e)
+        {
+            SizeLastColumn((ListView)sender);
+        }
+
         private void RefreshListView(Model.MasterInfo[] masters)
         {
             listView1.Items.Clear();
@@ -143,6 +174,11 @@ namespace MasterConverterGUI
             {
                 model.MasterInfos[e.Index].selection = false;
             }
+        }
+
+        private void SizeLastColumn(ListView listView)
+        {
+            listView.Columns[listView.Columns.Count - 1].Width = -2;
         }
 
         //------ ドラッグアンドドロップ制御 ------
