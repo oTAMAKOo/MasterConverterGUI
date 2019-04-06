@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿
+using System;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -51,6 +48,14 @@ namespace MasterConverterGUI
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             model.UserInfo.Save();
+        }
+
+
+        private void SetControlEnable(bool state)
+        {
+            comboBox1.Enabled = state;
+            ExecButton.Enabled = state;
+            Options.Enabled = state;
         }
 
         //------ コンボボックスコントロール制御 ------
@@ -311,7 +316,32 @@ namespace MasterConverterGUI
 
         private async void ExecButton_Click(object sender, EventArgs e)
         {
-            await ExecMasterConverter();
+            var exec = true;
+
+            switch (model.Mode)
+            {
+                case Mode.Import:
+                    {
+                        var caption = "インポート";
+                        var message = "レコード情報からマスターを再構築しますか？\n※出力されていないデータは破棄されます";
+
+                        var confirm = MessageBox.Show(message, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        exec = confirm == DialogResult.Yes;
+                    }
+                    break;
+            }
+
+            if (exec)
+            {
+                richTextBox1.Focus();
+
+                SetControlEnable(false);
+
+                await ExecMasterConverter();
+
+                SetControlEnable(true);
+            }
         }
 
         private void UpdateExecButton()
