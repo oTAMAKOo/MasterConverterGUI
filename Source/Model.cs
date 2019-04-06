@@ -104,7 +104,7 @@ namespace MasterConverterGUI
         {
             var masterInfos = MasterInfos.Where(x => x.selection).ToArray();
 
-            var taskQueue = new TaskQueue(maxQueueLength: 5);
+            var taskQueue = new TaskQueue(5);
 
             for (var i = 0; i < masterInfos.Length; i++)
             {
