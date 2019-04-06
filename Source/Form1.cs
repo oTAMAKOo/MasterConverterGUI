@@ -41,7 +41,11 @@ namespace MasterConverterGUI
 
             LoadConfig();
 
-            //------ 初期化 ------
+            //------ Model初期化 ------
+
+            model.Initialize();
+
+            //------ View初期化 ------
 
             InitializeListView();
             InitializeComboBox();
@@ -66,6 +70,7 @@ namespace MasterConverterGUI
                 Size = settings.Size;
             }
 
+            model.SearchDirectory = settings.SearchDirectory;
             model.Tags = settings.Tags;
             model.GenerateMessagePack = settings.GenerateMessagePack;
             model.MessagePackDirectory = settings.MessagePackDirectory;
@@ -89,6 +94,7 @@ namespace MasterConverterGUI
                 settings.Size = RestoreBounds.Size;
             }
 
+            settings.SearchDirectory = model.SearchDirectory;
             settings.Tags = model.Tags;
             settings.GenerateMessagePack = model.GenerateMessagePack;
             settings.MessagePackDirectory = model.MessagePackDirectory;
@@ -103,6 +109,8 @@ namespace MasterConverterGUI
             comboBox1.Enabled = state;
             ExecButton.Enabled = state;
             Options.Enabled = state;
+            button3.Enabled = state;
+            button3.Enabled = state;
         }
 
         //------ コンボボックスコントロール制御 ------
@@ -198,7 +206,7 @@ namespace MasterConverterGUI
 
             listView1.ItemCheck += ListView1_ItemCheck1;
 
-            // 列（コラム）ヘッダの作成.            
+            // 列（コラム）ヘッダの作成. 
             var masterNameColumn = new ColumnHeader() { Text = "Master", Width = 200 };
             var masterDirectoryColumn = new ColumnHeader() { Text = "Directory", Width = -2 };
 
@@ -215,10 +223,13 @@ namespace MasterConverterGUI
             e.Graphics.DrawRectangle(SystemPens.GradientInactiveCaption,
                                      new Rectangle(e.Bounds.X, 0, e.Bounds.Width, e.Bounds.Height));
 
-            string text = listView1.Columns[e.ColumnIndex].Text;
-            TextFormatFlags cFlag = TextFormatFlags.HorizontalCenter
-                                    | TextFormatFlags.VerticalCenter;
-            TextRenderer.DrawText(e.Graphics, text, listView1.Font, e.Bounds, Color.Black, cFlag);
+            if (e.ColumnIndex < listView1.Columns.Count)
+            {
+                var text = listView1.Columns[e.ColumnIndex].Text;
+                TextFormatFlags cFlag = TextFormatFlags.HorizontalCenter
+                                        | TextFormatFlags.VerticalCenter;
+                TextRenderer.DrawText(e.Graphics, text, listView1.Font, e.Bounds, Color.Black, cFlag);
+            }
         }
 
         private void listView1_DrawItem(object sender, DrawListViewItemEventArgs e)
@@ -239,7 +250,7 @@ namespace MasterConverterGUI
         private void RefreshListView(Model.MasterInfo[] masters)
         {
             listView1.Items.Clear();
-            
+
             foreach (var master in masters)
             {
                 var item = new ListViewItem();
@@ -266,7 +277,41 @@ namespace MasterConverterGUI
 
         private void SizeLastColumn(ListView listView)
         {
-            listView.Columns[listView.Columns.Count - 1].Width = -2;
+            if (1 < listView.Columns.Count)
+            {
+                listView.Columns[listView.Columns.Count - 1].Width = -2;
+            }
+        }
+
+        //------ 一括選択・解除ボタン制御 ------
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            foreach (var masterInfo in model.CurrentMasterInfos)
+            {
+                masterInfo.selection = true;
+            }
+
+            RefreshListView(model.CurrentMasterInfos);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            foreach (var masterInfo in model.CurrentMasterInfos)
+            {
+                masterInfo.selection = false;
+            }
+
+            RefreshListView(model.CurrentMasterInfos);
+        }
+
+        //------ 検索テキストボックス制御 ------
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            model.UpdateSearchText(textBox1.Text);
+
+            RefreshListView(model.CurrentMasterInfos);
         }
 
         //------ ドラッグアンドドロップ制御 ------
@@ -275,7 +320,12 @@ namespace MasterConverterGUI
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
 
-            model.Register(files);
+            var path = files.FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                model.Register(path);
+            }
         }
 
         private void OnDragEnter(object sender, DragEventArgs e)
@@ -318,7 +368,7 @@ namespace MasterConverterGUI
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             model.GenerateMessagePack = checkBox1.Checked;
-            
+
             UpdateExecButton();
         }
 
@@ -338,11 +388,11 @@ namespace MasterConverterGUI
 
             fbd.Description = "フォルダを指定してください。";
 
-            if(string.IsNullOrEmpty(selectionDirectory) && Directory.Exists(selectionDirectory))
+            if (string.IsNullOrEmpty(selectionDirectory) && Directory.Exists(selectionDirectory))
             {
                 fbd.SelectedPath = selectionDirectory;
             }
-            
+
             if (fbd.ShowDialog(this) == DialogResult.OK)
             {
                 path = fbd.SelectedPath;
@@ -388,9 +438,9 @@ namespace MasterConverterGUI
             switch (model.Mode)
             {
                 case Mode.Build:
-                {
-                    ExecButton.Enabled = model.GenerateMessagePack || model.GenerateYaml;
-                }
+                    {
+                        ExecButton.Enabled = model.GenerateMessagePack || model.GenerateYaml;
+                    }
                     break;
 
                 default:
@@ -418,14 +468,14 @@ namespace MasterConverterGUI
 
             Action<bool, string> onExecFinish = (result, log) =>
             {
-                if(result)
+                if (result)
                 {
                     success++;
                 }
 
                 lock (logBuilder)
                 {
-                    logBuilder.AppendLine(log);                    
+                    logBuilder.AppendLine(log);
                 }
 
                 progress++;
@@ -452,6 +502,6 @@ namespace MasterConverterGUI
 
                 MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }       
+        }
     }
 }

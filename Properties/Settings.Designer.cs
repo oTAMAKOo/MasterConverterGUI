@@ -106,5 +106,17 @@ namespace MasterConverterGUI.Properties {
                 this["YamlDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SearchDirectory {
+            get {
+                return ((string)(this["SearchDirectory"]));
+            }
+            set {
+                this["SearchDirectory"] = value;
+            }
+        }
     }
 }

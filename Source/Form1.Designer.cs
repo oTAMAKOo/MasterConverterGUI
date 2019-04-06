@@ -42,13 +42,16 @@
             this.label1 = new System.Windows.Forms.Label();
             this.listView1 = new System.Windows.Forms.ListView();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.Options.SuspendLayout();
             this.SuspendLayout();
             // 
             // ExecButton
             // 
             this.ExecButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ExecButton.Location = new System.Drawing.Point(494, 12);
+            this.ExecButton.Location = new System.Drawing.Point(498, 17);
             this.ExecButton.Name = "ExecButton";
             this.ExecButton.Size = new System.Drawing.Size(153, 39);
             this.ExecButton.TabIndex = 2;
@@ -60,7 +63,7 @@
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(11, 426);
+            this.progressBar1.Location = new System.Drawing.Point(11, 478);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(646, 10);
             this.progressBar1.TabIndex = 3;
@@ -72,7 +75,7 @@
             this.comboBox1.Font = new System.Drawing.Font("MS UI Gothic", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.ItemHeight = 13;
-            this.comboBox1.Location = new System.Drawing.Point(494, 64);
+            this.comboBox1.Location = new System.Drawing.Point(498, 69);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(153, 21);
             this.comboBox1.TabIndex = 4;
@@ -89,7 +92,7 @@
             this.Options.Controls.Add(this.label2);
             this.Options.Controls.Add(this.textBox2);
             this.Options.Controls.Add(this.label1);
-            this.Options.Location = new System.Drawing.Point(482, 97);
+            this.Options.Location = new System.Drawing.Point(482, 118);
             this.Options.Name = "Options";
             this.Options.Size = new System.Drawing.Size(177, 95);
             this.Options.TabIndex = 8;
@@ -177,7 +180,7 @@
             this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.CheckBoxes = true;
-            this.listView1.Location = new System.Drawing.Point(11, 12);
+            this.listView1.Location = new System.Drawing.Point(11, 31);
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(465, 181);
             this.listView1.TabIndex = 10;
@@ -193,19 +196,50 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox1.BackColor = System.Drawing.SystemColors.Control;
-            this.richTextBox1.Location = new System.Drawing.Point(10, 200);
+            this.richTextBox1.Location = new System.Drawing.Point(10, 219);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(648, 224);
+            this.richTextBox1.Size = new System.Drawing.Size(648, 255);
             this.richTextBox1.TabIndex = 11;
             this.richTextBox1.Text = "";
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(11, 5);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(60, 20);
+            this.button3.TabIndex = 12;
+            this.button3.Text = "全選択";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(77, 5);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(60, 20);
+            this.button4.TabIndex = 13;
+            this.button4.Text = "全解除";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(143, 5);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(142, 19);
+            this.textBox1.TabIndex = 14;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(667, 440);
+            this.ClientSize = new System.Drawing.Size(667, 492);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.ExecButton);
@@ -221,6 +255,7 @@
             this.Options.ResumeLayout(false);
             this.Options.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -239,6 +274,9 @@
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 

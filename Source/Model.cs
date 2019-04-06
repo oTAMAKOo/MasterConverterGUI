@@ -23,14 +23,19 @@ namespace MasterConverterGUI
         }
 
         //----- field -----
-        
+
+        public string searchText = null;
+
         private Subject<MasterInfo[]> onUpdateMasters = null;
 
         //----- property -----
 
         public Mode Mode { get; set; }
         public MasterInfo[] MasterInfos { get; private set; }
+        public MasterInfo[] CurrentMasterInfos { get; private set; }
 
+        /// <summary> マスター検索ディレクトリ </summary>
+        public string SearchDirectory { get; set; }
         /// <summary> タグ </summary>
         public string Tags { get; set; }
         /// <summary> MessagePackを出力するか </summary>
@@ -44,13 +49,18 @@ namespace MasterConverterGUI
 
         //----- method -----   
 
-        public Model()
+        public void Initialize()
         {
             Mode = Mode.Import;
             MasterInfos = new MasterInfo[0];
+
+            if (!string.IsNullOrEmpty(SearchDirectory))
+            {
+                Register(SearchDirectory);
+            }
         }
 
-        public void Register(string[] paths)
+        public void Register(string path)
         {
             var directory = string.Empty;
 
@@ -60,48 +70,75 @@ namespace MasterConverterGUI
 
             var list = new List<MasterInfo>();
 
-            for (var i = 0; i < paths.Length; i++)
+            if (File.Exists(path))
             {
-                var path = paths[i];
+                var info = Directory.GetParent(path);
 
-                if (File.Exists(path))
+                directory = info.FullName;
+            }
+            else
+            {
+                directory = path;
+            }
+
+            SearchDirectory = directory;
+
+            var filePaths = Directory.EnumerateFiles(directory, "ClassSchema.xlsx", SearchOption.AllDirectories);
+
+            foreach (var filePath in filePaths)
+            {
+                var folderInfo = Directory.GetParent(filePath);
+
+                var masterName = folderInfo.Name;
+
+                if (list.All(x => x.masterName != masterName))
                 {
-                    var info = Directory.GetParent(path);
-
-                    directory = info.FullName;
-                }
-                else
-                {
-                    directory = path;
-                }
-
-                var filePaths = Directory.EnumerateFiles(directory, "ClassSchema.xlsx", SearchOption.AllDirectories);
-
-                foreach (var filePath in filePaths)
-                {
-                    var folderInfo = Directory.GetParent(filePath);
-
-                    var masterName = folderInfo.Name;
-
-                    if (list.All(x => x.masterName != masterName))
+                    var info = new MasterInfo()
                     {
-                        var info = new MasterInfo()
-                        {
-                            selection = !unSelected.Contains(masterName),
-                            masterName = masterName,
-                            directory = folderInfo.FullName,
-                        };
+                        selection = !unSelected.Contains(masterName),
+                        masterName = masterName,
+                        directory = folderInfo.FullName,
+                    };
 
-                        list.Add(info);
-                    }
+                    list.Add(info);
                 }
             }
 
             MasterInfos = list.ToArray();
 
+            CurrentMasterInfos = MasterInfos;
+
             if (onUpdateMasters != null)
             {
                 onUpdateMasters.OnNext(MasterInfos);
+            }
+        }
+
+        private MasterInfo[] GetMatchOfList()
+        {
+            if (string.IsNullOrEmpty(searchText)) { return MasterInfos; }
+
+            var keywords = searchText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (var i = 0; i < keywords.Length; ++i)
+            {
+                keywords[i] = keywords[i].ToLower();
+            }
+            
+            return MasterInfos.Where(x => x.masterName.IsMatch(keywords)).ToArray();
+        }
+
+        public void UpdateSearchText(string text)
+        {
+            if (searchText == text) { return; }
+
+            searchText = text;
+
+            CurrentMasterInfos = GetMatchOfList();
+
+            if (onUpdateMasters != null)
+            {
+                onUpdateMasters.OnNext(CurrentMasterInfos);
             }
         }
 
