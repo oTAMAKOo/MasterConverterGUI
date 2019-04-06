@@ -19,7 +19,7 @@ namespace MasterConverterGUI
         {
             public bool selection;
             public string masterName;
-            public string directory;
+            public string localPath;
         }
 
         //----- field -----
@@ -97,7 +97,7 @@ namespace MasterConverterGUI
                     {
                         selection = !unSelected.Contains(masterName),
                         masterName = masterName,
-                        directory = folderInfo.FullName,
+                        localPath = folderInfo.FullName.Substring(SearchDirectory.Length),
                     };
 
                     list.Add(info);
@@ -124,8 +124,18 @@ namespace MasterConverterGUI
             {
                 keywords[i] = keywords[i].ToLower();
             }
+
+            Func<MasterInfo, bool> filter = info =>
+            {
+                var result = false;
+
+                result |= info.masterName.IsMatch(keywords);
+                result |= info.localPath.IsMatch(keywords);
+
+                return result;
+            };
             
-            return MasterInfos.Where(x => x.masterName.IsMatch(keywords)).ToArray();
+            return MasterInfos.Where(x => filter(x)).ToArray();
         }
 
         public void UpdateSearchText(string text)
@@ -265,7 +275,7 @@ namespace MasterConverterGUI
                     break;
             }
 
-            arguments.AppendFormat("--input {0} ", masterInfo.directory);
+            arguments.AppendFormat("--input {0} ", masterInfo.localPath);
             arguments.AppendFormat("--mode {0} ", modeText);
 
             if (!string.IsNullOrEmpty(MessagePackDirectory))

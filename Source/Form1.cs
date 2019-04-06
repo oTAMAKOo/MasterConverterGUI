@@ -256,7 +256,7 @@ namespace MasterConverterGUI
                 var item = new ListViewItem();
 
                 item.Text = master.masterName;
-                item.SubItems.Add(master.directory);
+                item.SubItems.Add(master.localPath);
                 item.Checked = master.selection;
 
                 listView1.Items.Add(item);
