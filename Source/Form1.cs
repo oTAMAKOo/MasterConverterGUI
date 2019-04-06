@@ -36,6 +36,11 @@ namespace MasterConverterGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // 初期サイズが最小サイズ.
+            MinimumSize = Size;
+
+            LoadConfig();
+
             //------ 初期化 ------
 
             InitializeListView();
@@ -47,9 +52,51 @@ namespace MasterConverterGUI
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            model.UserInfo.Save();
+            SaveConfig();
         }
 
+        // 設定を読み込み.
+        private void LoadConfig()
+        {
+            var settings = Properties.Settings.Default;
+
+            if (settings.Size.Width != 0 || settings.Size.Height != 0)
+            {
+                Location = settings.Location;
+                Size = settings.Size;
+            }
+
+            model.Tags = settings.Tags;
+            model.GenerateMessagePack = settings.GenerateMessagePack;
+            model.MessagePackDirectory = settings.MessagePackDirectory;
+            model.GenerateYaml = settings.GenerateYaml;
+            model.YamlDirectory = settings.YamlDirectory;
+        }
+
+        // 設定を保存.
+        private void SaveConfig()
+        {
+            var settings = Properties.Settings.Default;
+
+            if (WindowState == FormWindowState.Normal)
+            {
+                settings.Location = Location;
+                settings.Size = Size;
+            }
+            else
+            {
+                settings.Location = RestoreBounds.Location;
+                settings.Size = RestoreBounds.Size;
+            }
+
+            settings.Tags = model.Tags;
+            settings.GenerateMessagePack = model.GenerateMessagePack;
+            settings.MessagePackDirectory = model.MessagePackDirectory;
+            settings.GenerateYaml = model.GenerateYaml;
+            settings.YamlDirectory = model.YamlDirectory;
+
+            settings.Save();
+        }
 
         private void SetControlEnable(bool state)
         {
@@ -69,8 +116,6 @@ namespace MasterConverterGUI
 
         private void comboBox1_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            var userData = model.UserInfo.Data;
-
             model.Mode = (Mode)comboBox1.SelectedIndex;
 
             richTextBox1.Text = string.Empty;
@@ -84,13 +129,11 @@ namespace MasterConverterGUI
                         var directory = string.Empty;
 
                         // MessagePack.
-                        var messagePackDirectory = userData.MessagePackDirectory;
-                        directory = string.IsNullOrEmpty(messagePackDirectory) ? "---" : messagePackDirectory;
+                        directory = string.IsNullOrEmpty(model.MessagePackDirectory) ? "---" : model.MessagePackDirectory;
                         builder.AppendLine(string.Format("[Export] MessagePack : {0}", directory));
 
                         // Yaml.
-                        var yamlDirectory = userData.YamlDirectory;
-                        directory = string.IsNullOrEmpty(yamlDirectory) ? "---" : yamlDirectory;
+                        directory = string.IsNullOrEmpty(model.YamlDirectory) ? "---" : model.YamlDirectory;
                         builder.AppendLine(string.Format("[Export] Yaml : {0}", directory));
                     }
                     break;
@@ -251,41 +294,37 @@ namespace MasterConverterGUI
 
         private void InitializeOptions()
         {
-            textBox2.Text = model.UserInfo.Data.Tags;
-            checkBox1.Checked = model.UserInfo.Data.GenerateMessagePack;
-            checkBox2.Checked = model.UserInfo.Data.GenerateYaml;
+            textBox2.Text = model.Tags;
+            checkBox1.Checked = model.GenerateMessagePack;
+            checkBox2.Checked = model.GenerateYaml;
         }
 
         // タグ設定テキストボックス.
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            model.UserInfo.Data.Tags = textBox2.Text;
+            model.Tags = textBox2.Text;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var selectionDirectory = model.UserInfo.Data.MessagePackDirectory;
-
-            model.UserInfo.Data.MessagePackDirectory = OpenSaveFolderBrowserDialog(selectionDirectory);
+            model.MessagePackDirectory = OpenSaveFolderBrowserDialog(model.MessagePackDirectory);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var selectionDirectory = model.UserInfo.Data.YamlDirectory;
-
-            model.UserInfo.Data.YamlDirectory = OpenSaveFolderBrowserDialog(selectionDirectory);
+            model.YamlDirectory = OpenSaveFolderBrowserDialog(model.YamlDirectory);
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            model.UserInfo.Data.GenerateMessagePack = checkBox1.Checked;
+            model.GenerateMessagePack = checkBox1.Checked;
             
             UpdateExecButton();
         }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            model.UserInfo.Data.GenerateYaml = checkBox2.Checked;
+            model.GenerateYaml = checkBox2.Checked;
 
             UpdateExecButton();
         }
@@ -350,7 +389,7 @@ namespace MasterConverterGUI
             {
                 case Mode.Build:
                 {
-                    ExecButton.Enabled = model.UserInfo.Data.GenerateMessagePack || model.UserInfo.Data.GenerateYaml;
+                    ExecButton.Enabled = model.GenerateMessagePack || model.GenerateYaml;
                 }
                     break;
 

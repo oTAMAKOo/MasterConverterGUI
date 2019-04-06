@@ -30,7 +30,17 @@ namespace MasterConverterGUI
 
         public Mode Mode { get; set; }
         public MasterInfo[] MasterInfos { get; private set; }
-        public UserInfo UserInfo { get; private set; }
+
+        /// <summary> タグ </summary>
+        public string Tags { get; set; }
+        /// <summary> MessagePackを出力するか </summary>
+        public bool GenerateMessagePack { get; set; }
+        /// <summary> MessagePack出力ディレクトリ </summary>
+        public string MessagePackDirectory { get; set; }
+        /// <summary> Yamlを出力するか </summary>
+        public bool GenerateYaml { get; set; }
+        /// <summary> Yaml出力ディレクトリ </summary>
+        public string YamlDirectory { get; set; }
 
         //----- method -----   
 
@@ -38,9 +48,6 @@ namespace MasterConverterGUI
         {
             Mode = Mode.Import;
             MasterInfos = new MasterInfo[0];
-            UserInfo = new UserInfo();
-
-            UserInfo.Load();
         }
 
         public void Register(string[] paths)
@@ -192,8 +199,6 @@ namespace MasterConverterGUI
         {
             var arguments = new StringBuilder();
 
-            var userData = UserInfo.Data;
-
             var modeText = Constants.GetArgumentText(Mode);
             var tags = string.Empty;
             var export = string.Empty;
@@ -202,25 +207,22 @@ namespace MasterConverterGUI
             {
                 case Mode.Build:
                     {
-                        var generateMessagePack = userData.GenerateMessagePack;
-                        var generateYaml = userData.GenerateYaml;
-
-                        if (generateMessagePack && generateYaml)
+                        if (GenerateMessagePack && GenerateYaml)
                         {
                             export = "both";
                         }
-                        else if (generateMessagePack)
+                        else if (GenerateMessagePack)
                         {
                             export = "messagepack";
                         }
-                        else if (generateYaml)
+                        else if (GenerateYaml)
                         {
                             export = "yaml";
                         }
 
-                        if (!string.IsNullOrEmpty(userData.Tags))
+                        if (!string.IsNullOrEmpty(Tags))
                         {
-                            tags = string.Join(",", userData.Tags.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray());
+                            tags = string.Join(",", Tags.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray());
                         }
                     }
                     break;
@@ -229,14 +231,14 @@ namespace MasterConverterGUI
             arguments.AppendFormat("--input {0} ", masterInfo.directory);
             arguments.AppendFormat("--mode {0} ", modeText);
 
-            if (!string.IsNullOrEmpty(userData.MessagePackDirectory))
+            if (!string.IsNullOrEmpty(MessagePackDirectory))
             {
-                arguments.AppendFormat("--messagepack {0} ", userData.MessagePackDirectory);
+                arguments.AppendFormat("--messagepack {0} ", MessagePackDirectory);
             }
 
-            if (!string.IsNullOrEmpty(userData.YamlDirectory))
+            if (!string.IsNullOrEmpty(YamlDirectory))
             {
-                arguments.AppendFormat("--yaml {0} ", userData.YamlDirectory);
+                arguments.AppendFormat("--yaml {0} ", YamlDirectory);
             }
 
             if (!string.IsNullOrEmpty(tags))
