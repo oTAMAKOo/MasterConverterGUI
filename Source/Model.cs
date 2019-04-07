@@ -275,7 +275,9 @@ namespace MasterConverterGUI
                     break;
             }
 
-            arguments.AppendFormat("--input {0} ", masterInfo.localPath);
+            var path = SearchDirectory + masterInfo.localPath;
+
+            arguments.AppendFormat("--input {0} ", path);
             arguments.AppendFormat("--mode {0} ", modeText);
 
             if (!string.IsNullOrEmpty(MessagePackDirectory))
