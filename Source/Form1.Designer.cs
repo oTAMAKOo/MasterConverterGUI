@@ -258,6 +258,7 @@
             this.Controls.Add(this.Options);
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.richTextBox1);
+            this.DoubleBuffered = true;
             this.Name = "Form1";
             this.Text = "MasterConverterGUI";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);

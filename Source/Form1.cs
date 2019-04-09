@@ -1,9 +1,9 @@
 ﻿
 using System;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -51,6 +51,11 @@ namespace MasterConverterGUI
             InitializeComboBox();
             InitializeOptions();
 
+            //------ ダブルバッファリング ------
+
+            EnableDoubleBuffer(listView1);
+            EnableDoubleBuffer(richTextBox1);
+
             UpdateExecButton();
         }
 
@@ -58,7 +63,7 @@ namespace MasterConverterGUI
         {
             SaveConfig();
         }
-
+        
         // 設定を読み込み.
         private void LoadConfig()
         {
@@ -205,7 +210,7 @@ namespace MasterConverterGUI
             listView1.Sorting = SortOrder.None;
             listView1.View = View.Details;
             listView1.HeaderStyle = ColumnHeaderStyle.None;
-
+            
             listView1.ItemCheck += OnItemCheck;
             listView1.MouseDown += OnItemMouseDown;
             listView1.MouseDoubleClick += OnItemDoubleClick;
@@ -253,6 +258,8 @@ namespace MasterConverterGUI
 
         private void RefreshListView(Model.MasterInfo[] masters)
         {
+            listView1.BeginUpdate();
+
             listView1.Items.Clear();
 
             foreach (var master in masters)
@@ -265,6 +272,8 @@ namespace MasterConverterGUI
 
                 listView1.Items.Add(item);
             }
+
+            listView1.EndUpdate();
         }
 
         private void OnItemCheck(object sender, ItemCheckEventArgs e)
@@ -275,14 +284,18 @@ namespace MasterConverterGUI
                 e.NewValue = e.NewValue == CheckState.Checked ? CheckState.Unchecked : CheckState.Checked;
             }
 
+            var masterInfo = model.CurrentMasterInfos[e.Index];
+
             if (e.NewValue == CheckState.Unchecked)
             {
-                model.MasterInfos[e.Index].selection = true;
+                masterInfo.selection = false;
             }
             else if (e.NewValue == CheckState.Checked)
             {
-                model.MasterInfos[e.Index].selection = false;
+                masterInfo.selection = true;
             }
+
+            model.UpdateMasterInfo(masterInfo);
         }
 
         private void OnItemMouseDown(object sender, MouseEventArgs e)
@@ -349,6 +362,8 @@ namespace MasterConverterGUI
             foreach (var masterInfo in model.CurrentMasterInfos)
             {
                 masterInfo.selection = true;
+
+                model.UpdateMasterInfo(masterInfo);
             }
 
             RefreshListView(model.CurrentMasterInfos);
@@ -359,6 +374,8 @@ namespace MasterConverterGUI
             foreach (var masterInfo in model.CurrentMasterInfos)
             {
                 masterInfo.selection = false;
+
+                model.UpdateMasterInfo(masterInfo);
             }
 
             RefreshListView(model.CurrentMasterInfos);
@@ -561,6 +578,13 @@ namespace MasterConverterGUI
 
                 MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        public static void EnableDoubleBuffer(Control c)
+        {
+            var prop = c.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            prop.SetValue(c, true, null);
         }
     }
 }

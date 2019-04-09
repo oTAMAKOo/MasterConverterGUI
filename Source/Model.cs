@@ -125,6 +125,18 @@ namespace MasterConverterGUI
             }
         }
 
+        public void UpdateMasterInfo(MasterInfo masterInfo)
+        {
+            if (masterInfo == null) { return; }
+            
+            for (var i = 0; i < MasterInfos.Length; i++)
+            {
+                if (MasterInfos[i] != masterInfo) { continue; }
+
+                MasterInfos[i] = masterInfo;
+            }
+        }
+
         private MasterInfo[] GetMatchOfList()
         {
             if (string.IsNullOrEmpty(searchText)) { return MasterInfos; }
