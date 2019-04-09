@@ -114,6 +114,17 @@ namespace MasterConverterGUI
             }
         }
 
+        public void OpenMasterXlsx(MasterInfo info)
+        {
+            var fileName = info.masterName + Constants.MasterFileExtension;
+            var path = SearchDirectory + info.localPath + Path.DirectorySeparatorChar + fileName;
+
+            if (File.Exists(path))
+            {
+                Process.Start(path);
+            }
+        }
+
         private MasterInfo[] GetMatchOfList()
         {
             if (string.IsNullOrEmpty(searchText)) { return MasterInfos; }

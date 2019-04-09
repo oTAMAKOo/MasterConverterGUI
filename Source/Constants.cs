@@ -26,5 +26,7 @@ namespace MasterConverterGUI
         {
             return ModeTable[mode];
         }
+
+        public static string MasterFileExtension = ".xlsx";
     }
 }

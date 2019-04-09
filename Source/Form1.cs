@@ -109,8 +109,8 @@ namespace MasterConverterGUI
             comboBox1.Enabled = state;
             ExecButton.Enabled = state;
             Options.Enabled = state;
-            button3.Enabled = state;
-            button3.Enabled = state;
+            select_all.Enabled = state;
+            select_all.Enabled = state;
         }
 
         //------ コンボボックスコントロール制御 ------
@@ -194,6 +194,8 @@ namespace MasterConverterGUI
 
         //------ リストビューコントロール制御 ------
 
+        private bool checkChangeCancel = false;
+
         private void InitializeListView()
         {
             listView1.FullRowSelect = true;
@@ -204,7 +206,9 @@ namespace MasterConverterGUI
             listView1.View = View.Details;
             listView1.HeaderStyle = ColumnHeaderStyle.None;
 
-            listView1.ItemCheck += ListView1_ItemCheck1;
+            listView1.ItemCheck += OnItemCheck;
+            listView1.MouseDown += OnItemMouseDown;
+            listView1.MouseDoubleClick += OnItemDoubleClick;
 
             // 列（コラム）ヘッダの作成. 
             var masterNameColumn = new ColumnHeader() { Text = "Master", Width = 200 };
@@ -263,16 +267,71 @@ namespace MasterConverterGUI
             }
         }
 
-        private void ListView1_ItemCheck1(object sender, ItemCheckEventArgs e)
+        private void OnItemCheck(object sender, ItemCheckEventArgs e)
         {
-            if (e.CurrentValue == CheckState.Unchecked)
+            // 変更却下状態時はチェック変更をキャンセル.
+            if (checkChangeCancel)
+            {
+                e.NewValue = e.NewValue == CheckState.Checked ? CheckState.Unchecked : CheckState.Checked;
+            }
+
+            if (e.NewValue == CheckState.Unchecked)
             {
                 model.MasterInfos[e.Index].selection = true;
             }
-            else if (e.CurrentValue == CheckState.Checked)
+            else if (e.NewValue == CheckState.Checked)
             {
                 model.MasterInfos[e.Index].selection = false;
             }
+        }
+
+        private void OnItemMouseDown(object sender, MouseEventArgs e)
+        {
+            // マウスボタンが押された回数を判定.
+            checkChangeCancel = e.Clicks == 2;
+
+            var item = listView1.GetItemAt(e.X, e.Y);
+
+            if (item != null)
+            {
+                var rect = GetCheckBoxRectangle(listView1, item.Index);
+
+                // チェックボックスの場所でマウスが押された場合のみCheckBoxを反転させる.
+                checkChangeCancel &= !rect.Contains(e.Location);
+
+                if (item.Selected)
+                {
+                    item.Selected = true;
+                }
+            }
+        }
+
+        private void OnItemDoubleClick(object sender, MouseEventArgs e)
+        {
+            var item = listView1.GetItemAt(e.X, e.Y);
+
+            if (item != null)
+            {
+                var checkRect = GetCheckBoxRectangle(listView1, item.Index);
+
+                if (!checkRect.Contains(e.Location))
+                {
+                    model.OpenMasterXlsx(model.CurrentMasterInfos[item.Index]);
+                }
+            }
+
+            checkChangeCancel = false;
+        }
+
+        private static Rectangle GetCheckBoxRectangle(ListView listView, int itemIndex)
+        {
+            var CHECKBOXSIZE = new Size(16, 16);
+
+            var bounds = listView.GetItemRect(itemIndex);
+
+            var y = bounds.Y + (bounds.Height - CHECKBOXSIZE.Height) / 2;
+            
+            return new Rectangle(new Point(0, y), CHECKBOXSIZE);
         }
 
         private void SizeLastColumn(ListView listView)
@@ -285,7 +344,7 @@ namespace MasterConverterGUI
 
         //------ 一括選択・解除ボタン制御 ------
 
-        private void button3_Click(object sender, EventArgs e)
+        private void SelectAllButton_Click(object sender, EventArgs e)
         {
             foreach (var masterInfo in model.CurrentMasterInfos)
             {
@@ -295,7 +354,7 @@ namespace MasterConverterGUI
             RefreshListView(model.CurrentMasterInfos);
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void UnSelectAllButton_Click(object sender, EventArgs e)
         {
             foreach (var masterInfo in model.CurrentMasterInfos)
             {
