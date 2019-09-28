@@ -235,8 +235,7 @@ namespace MasterConverterGUI
             if (e.ColumnIndex < listView1.Columns.Count)
             {
                 var text = listView1.Columns[e.ColumnIndex].Text;
-                TextFormatFlags cFlag = TextFormatFlags.HorizontalCenter
-                                        | TextFormatFlags.VerticalCenter;
+                TextFormatFlags cFlag = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter;
                 TextRenderer.DrawText(e.Graphics, text, listView1.Font, e.Bounds, Color.Black, cFlag);
             }
         }
@@ -327,10 +326,22 @@ namespace MasterConverterGUI
             {
                 var checkRect = GetCheckBoxRectangle(listView1, item.Index);
 
+                var masterNameRect = GetMasterNameRectangle(listView1, item.Index);
+
+                var masterInfo = model.CurrentMasterInfos[item.Index];
+
                 if (!checkRect.Contains(e.Location))
                 {
-                    model.OpenMasterXlsx(model.CurrentMasterInfos[item.Index]);
+                    if (masterNameRect.Contains(e.Location))
+                    {
+                        model.OpenMasterXlsx(masterInfo);
+                    }
+                    else
+                    {
+                        model.OpenMasterDirectory(masterInfo);
+                    }
                 }
+
             }
 
             checkChangeCancel = false;
@@ -338,13 +349,25 @@ namespace MasterConverterGUI
 
         private static Rectangle GetCheckBoxRectangle(ListView listView, int itemIndex)
         {
-            var CHECKBOXSIZE = new Size(16, 16);
+            var rectSize = new Size(16, 16);
 
             var bounds = listView.GetItemRect(itemIndex);
 
-            var y = bounds.Y + (bounds.Height - CHECKBOXSIZE.Height) / 2;
+            var y = bounds.Y + (bounds.Height - rectSize.Height) / 2;
             
-            return new Rectangle(new Point(0, y), CHECKBOXSIZE);
+            return new Rectangle(new Point(0, y), rectSize);
+        }
+
+        private static Rectangle GetMasterNameRectangle(ListView listView, int itemIndex)
+        {
+            var rectSize = new Size(16 + 200, 16);
+            var xOffset = 16;
+
+            var bounds = listView.GetItemRect(itemIndex);
+
+            var y = bounds.Y + (bounds.Height - rectSize.Height) / 2;
+
+            return new Rectangle(new Point(xOffset, y), rectSize);
         }
 
         private void SizeLastColumn(ListView listView)

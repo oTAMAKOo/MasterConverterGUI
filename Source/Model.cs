@@ -125,6 +125,16 @@ namespace MasterConverterGUI
             }
         }
 
+        public void OpenMasterDirectory(MasterInfo info)
+        {
+            var path = SearchDirectory + info.localPath + Path.DirectorySeparatorChar;
+
+            if (Directory.Exists(path))
+            {
+                Process.Start(path);
+            }
+        }
+
         public void UpdateMasterInfo(MasterInfo masterInfo)
         {
             if (masterInfo == null) { return; }
