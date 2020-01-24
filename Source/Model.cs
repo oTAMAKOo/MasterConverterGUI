@@ -215,7 +215,7 @@ namespace MasterConverterGUI
 
             process.StartInfo = new ProcessStartInfo()
             {
-                FileName = @"./MasterConverter.exe",
+                FileName = @"../MasterConverter/MasterConverter.exe",
 
                 UseShellExecute = false,
                 CreateNoWindow = true,
