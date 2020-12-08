@@ -28,5 +28,7 @@ namespace MasterConverterGUI
         }
 
         public static string MasterFileExtension = ".xlsx";
+
+        public static string MasterConverterPath = @"../MasterConverter/MasterConverter.exe";
     }
 }

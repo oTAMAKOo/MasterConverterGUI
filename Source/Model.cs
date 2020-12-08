@@ -187,6 +187,15 @@ namespace MasterConverterGUI
 
         public async Task ConvertMaster(Action<bool, string> onExecFinish)
         {
+            if (!File.Exists(Constants.MasterConverterPath))
+            {
+                var errorMessage = string.Format("{0} not found.", Constants.MasterConverterPath);
+
+                onExecFinish(false, errorMessage);
+
+                return;
+            }
+
             var masterInfos = MasterInfos.Where(x => x.selection).ToArray();
 
             var taskQueue = new TaskQueue(5);
@@ -215,7 +224,7 @@ namespace MasterConverterGUI
 
             process.StartInfo = new ProcessStartInfo()
             {
-                FileName = @"../MasterConverter/MasterConverter.exe",
+                FileName = Constants.MasterConverterPath,
 
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -236,7 +245,7 @@ namespace MasterConverterGUI
             EventHandler eventHandler = (sender, args) =>
             {
                 sw.Stop();
-                
+
                 if (process.ExitCode == 0)
                 {
                     var time = sw.Elapsed.TotalMilliseconds.ToString("F2");
@@ -263,7 +272,7 @@ namespace MasterConverterGUI
 
             process.OutputDataReceived += logReceive;
             process.ErrorDataReceived += logReceive;
-            
+
             process.Start();
 
             process.Exited += eventHandler;
@@ -271,7 +280,7 @@ namespace MasterConverterGUI
 
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-
+    
             return tcs.Task;
         }
 
