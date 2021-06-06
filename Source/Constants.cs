@@ -10,7 +10,6 @@ namespace MasterConverterGUI
     {
         Import = 0,
         Export,
-        Build,
     }
 
     public static class Constants
@@ -19,7 +18,6 @@ namespace MasterConverterGUI
         {
             { Mode.Import,  "import" },
             { Mode.Export,  "export" },
-            { Mode.Build,   "build"  },
         };
 
         public static string GetArgumentText(Mode mode)

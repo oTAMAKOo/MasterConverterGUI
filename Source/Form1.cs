@@ -55,8 +55,6 @@ namespace MasterConverterGUI
 
             EnableDoubleBuffer(listView1);
             EnableDoubleBuffer(richTextBox1);
-
-            UpdateExecButton();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -77,10 +75,6 @@ namespace MasterConverterGUI
 
             model.SearchDirectory = settings.SearchDirectory;
             model.Tags = settings.Tags;
-            model.GenerateMessagePack = settings.GenerateMessagePack;
-            model.MessagePackDirectory = settings.MessagePackDirectory;
-            model.GenerateYaml = settings.GenerateYaml;
-            model.YamlDirectory = settings.YamlDirectory;
         }
 
         // 設定を保存.
@@ -101,10 +95,6 @@ namespace MasterConverterGUI
 
             settings.SearchDirectory = model.SearchDirectory;
             settings.Tags = model.Tags;
-            settings.GenerateMessagePack = model.GenerateMessagePack;
-            settings.MessagePackDirectory = model.MessagePackDirectory;
-            settings.GenerateYaml = model.GenerateYaml;
-            settings.YamlDirectory = model.YamlDirectory;
 
             settings.Save();
         }
@@ -132,29 +122,6 @@ namespace MasterConverterGUI
             model.Mode = (Mode)comboBox1.SelectedIndex;
 
             richTextBox1.Text = string.Empty;
-
-            var builder = new StringBuilder();
-
-            switch (model.Mode)
-            {
-                case Mode.Build:
-                    {
-                        var directory = string.Empty;
-
-                        // MessagePack.
-                        directory = string.IsNullOrEmpty(model.MessagePackDirectory) ? "---" : model.MessagePackDirectory;
-                        builder.AppendLine(string.Format("[Export] MessagePack : {0}", directory));
-
-                        // Yaml.
-                        directory = string.IsNullOrEmpty(model.YamlDirectory) ? "---" : model.YamlDirectory;
-                        builder.AppendLine(string.Format("[Export] Yaml : {0}", directory));
-                    }
-                    break;
-            }
-
-            richTextBox1.Text += builder.ToString();
-
-            UpdateExecButton();
         }
 
         //------ ログテキストビューコントロール制御 ------
@@ -444,38 +411,12 @@ namespace MasterConverterGUI
         private void InitializeOptions()
         {
             textBox2.Text = model.Tags;
-            checkBox1.Checked = model.GenerateMessagePack;
-            checkBox2.Checked = model.GenerateYaml;
         }
 
         // タグ設定テキストボックス.
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             model.Tags = textBox2.Text;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            model.MessagePackDirectory = OpenSaveFolderBrowserDialog(model.MessagePackDirectory);
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            model.YamlDirectory = OpenSaveFolderBrowserDialog(model.YamlDirectory);
-        }
-
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            model.GenerateMessagePack = checkBox1.Checked;
-
-            UpdateExecButton();
-        }
-
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
-        {
-            model.GenerateYaml = checkBox2.Checked;
-
-            UpdateExecButton();
         }
 
         // 保存先フォルダ選択ダイアログ.
@@ -529,22 +470,6 @@ namespace MasterConverterGUI
                 await ExecMasterConverter();
 
                 SetControlEnable(true);
-            }
-        }
-
-        private void UpdateExecButton()
-        {
-            switch (model.Mode)
-            {
-                case Mode.Build:
-                    {
-                        ExecButton.Enabled = model.GenerateMessagePack || model.GenerateYaml;
-                    }
-                    break;
-
-                default:
-                    ExecButton.Enabled = true;
-                    break;
             }
         }
 
@@ -608,6 +533,11 @@ namespace MasterConverterGUI
             var prop = c.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
 
             prop.SetValue(c, true, null);
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

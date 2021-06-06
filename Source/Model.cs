@@ -38,14 +38,6 @@ namespace MasterConverterGUI
         public string SearchDirectory { get; set; }
         /// <summary> タグ </summary>
         public string Tags { get; set; }
-        /// <summary> MessagePackを出力するか </summary>
-        public bool GenerateMessagePack { get; set; }
-        /// <summary> MessagePack出力ディレクトリ </summary>
-        public string MessagePackDirectory { get; set; }
-        /// <summary> Yamlを出力するか </summary>
-        public bool GenerateYaml { get; set; }
-        /// <summary> Yaml出力ディレクトリ </summary>
-        public string YamlDirectory { get; set; }
 
         //----- method -----   
 
@@ -292,45 +284,10 @@ namespace MasterConverterGUI
             var tags = string.Empty;
             var export = string.Empty;
 
-            switch (Mode)
-            {
-                case Mode.Build:
-                    {
-                        if (GenerateMessagePack && GenerateYaml)
-                        {
-                            export = "both";
-                        }
-                        else if (GenerateMessagePack)
-                        {
-                            export = "messagepack";
-                        }
-                        else if (GenerateYaml)
-                        {
-                            export = "yaml";
-                        }
-
-                        if (!string.IsNullOrEmpty(Tags))
-                        {
-                            tags = string.Join(",", Tags.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray());
-                        }
-                    }
-                    break;
-            }
-
             var path = SearchDirectory + masterInfo.localPath;
 
             arguments.AppendFormat("--input {0} ", path);
             arguments.AppendFormat("--mode {0} ", modeText);
-
-            if (!string.IsNullOrEmpty(MessagePackDirectory))
-            {
-                arguments.AppendFormat("--messagepack {0} ", MessagePackDirectory);
-            }
-
-            if (!string.IsNullOrEmpty(YamlDirectory))
-            {
-                arguments.AppendFormat("--yaml {0} ", YamlDirectory);
-            }
 
             if (!string.IsNullOrEmpty(tags))
             {
