@@ -299,6 +299,8 @@ namespace MasterConverterGUI
                 arguments.AppendFormat("--export {0} ", export);
             }
 
+            arguments.Append("--exit");
+
             return arguments.ToString();
         }
 
