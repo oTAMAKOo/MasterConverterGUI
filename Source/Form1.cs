@@ -49,7 +49,6 @@ namespace MasterConverterGUI
 
             InitializeListView();
             InitializeComboBox();
-            InitializeOptions();
 
             //------ ダブルバッファリング ------
 
@@ -103,7 +102,6 @@ namespace MasterConverterGUI
         {
             comboBox1.Enabled = state;
             ExecButton.Enabled = state;
-            Options.Enabled = state;
             select_all.Enabled = state;
             select_all.Enabled = state;
         }
@@ -404,19 +402,6 @@ namespace MasterConverterGUI
             {
                 e.Effect = DragDropEffects.None;
             }
-        }
-
-        //------ オプション制御 ------
-
-        private void InitializeOptions()
-        {
-            textBox2.Text = model.Tags;
-        }
-
-        // タグ設定テキストボックス.
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-            model.Tags = textBox2.Text;
         }
 
         // 保存先フォルダ選択ダイアログ.

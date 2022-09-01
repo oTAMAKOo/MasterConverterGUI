@@ -281,18 +281,12 @@ namespace MasterConverterGUI
             var arguments = new StringBuilder();
 
             var modeText = Constants.GetArgumentText(Mode);
-            var tags = string.Empty;
             var export = string.Empty;
 
             var path = SearchDirectory + masterInfo.localPath;
 
             arguments.AppendFormat("--input {0} ", path);
             arguments.AppendFormat("--mode {0} ", modeText);
-
-            if (!string.IsNullOrEmpty(tags))
-            {
-                arguments.AppendFormat("--tag {0} ", tags);
-            }
 
             if (!string.IsNullOrEmpty(export))
             {

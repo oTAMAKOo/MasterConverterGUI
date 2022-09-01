@@ -32,24 +32,20 @@
             this.ExecButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.Options = new System.Windows.Forms.GroupBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.listView1 = new System.Windows.Forms.ListView();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.select_all = new System.Windows.Forms.Button();
             this.unselect_all = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.Options.SuspendLayout();
             this.SuspendLayout();
             // 
             // ExecButton
             // 
             this.ExecButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ExecButton.Font = new System.Drawing.Font("游ゴシック", 9F);
-            this.ExecButton.Location = new System.Drawing.Point(497, 142);
+            this.ExecButton.Location = new System.Drawing.Point(555, 4);
             this.ExecButton.Name = "ExecButton";
-            this.ExecButton.Size = new System.Drawing.Size(153, 39);
+            this.ExecButton.Size = new System.Drawing.Size(100, 24);
             this.ExecButton.TabIndex = 2;
             this.ExecButton.Text = "実行";
             this.ExecButton.UseVisualStyleBackColor = true;
@@ -71,44 +67,12 @@
             this.comboBox1.Font = new System.Drawing.Font("游ゴシック", 8.5F);
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.ItemHeight = 14;
-            this.comboBox1.Location = new System.Drawing.Point(497, 31);
+            this.comboBox1.Location = new System.Drawing.Point(429, 5);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(153, 22);
+            this.comboBox1.Size = new System.Drawing.Size(108, 22);
             this.comboBox1.TabIndex = 4;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             this.comboBox1.SelectionChangeCommitted += new System.EventHandler(this.comboBox1_SelectionChangeCommitted);
-            // 
-            // Options
-            // 
-            this.Options.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Options.Controls.Add(this.textBox2);
-            this.Options.Controls.Add(this.label1);
-            this.Options.Font = new System.Drawing.Font("游ゴシック", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.Options.Location = new System.Drawing.Point(497, 63);
-            this.Options.Name = "Options";
-            this.Options.Size = new System.Drawing.Size(153, 48);
-            this.Options.TabIndex = 8;
-            this.Options.TabStop = false;
-            this.Options.Text = "Options";
-            // 
-            // textBox2
-            // 
-            this.textBox2.Font = new System.Drawing.Font("Arial Narrow", 8.25F);
-            this.textBox2.Location = new System.Drawing.Point(64, 18);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(83, 20);
-            this.textBox2.TabIndex = 3;
-            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("游ゴシック", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.label1.Location = new System.Drawing.Point(2, 21);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(51, 14);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "出力タグ";
             // 
             // listView1
             // 
@@ -119,7 +83,7 @@
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(11, 31);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(465, 181);
+            this.listView1.Size = new System.Drawing.Size(644, 181);
             this.listView1.TabIndex = 10;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.listView1_DrawColumnHeader);
@@ -168,7 +132,7 @@
             this.textBox1.Font = new System.Drawing.Font("Arial Narrow", 8.25F);
             this.textBox1.Location = new System.Drawing.Point(142, 5);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(156, 20);
+            this.textBox1.Size = new System.Drawing.Size(220, 20);
             this.textBox1.TabIndex = 14;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -184,7 +148,6 @@
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.ExecButton);
-            this.Controls.Add(this.Options);
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.richTextBox1);
             this.DoubleBuffered = true;
@@ -195,8 +158,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.OnDragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.OnDragEnter);
-            this.Options.ResumeLayout(false);
-            this.Options.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -206,10 +167,7 @@
         private System.Windows.Forms.Button ExecButton;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.GroupBox Options;
         private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button select_all;
         private System.Windows.Forms.Button unselect_all;
